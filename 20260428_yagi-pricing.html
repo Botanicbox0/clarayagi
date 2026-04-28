@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YAGI — 영상 제작 견적</title>
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --w:#fff;--b:#0a0a0a;
+  --g50:#f9f9f9;--g100:#f2f2f2;--g200:#e5e5e5;--g300:#d0d0d0;
+  --g400:#a0a0a0;--g500:#737373;--g700:#404040;
+  --bd:#e5e5e5;
+}
+body{font-family:'Pretendard',-apple-system,sans-serif;background:var(--w);color:var(--b);min-height:100vh;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+/* NAV */
+nav{display:flex;align-items:center;justify-content:space-between;padding:0 2.5rem;height:60px;border-bottom:1px solid var(--bd);position:sticky;top:0;background:rgba(255,255,255,.95);backdrop-filter:blur(14px);z-index:300}
+.nav-logo{font-size:15px;font-weight:700;letter-spacing:.12em}
+.nav-sub{font-size:10px;color:var(--g400);margin-top:1px}
+
+/* CONFIDENTIAL BAR */
+.conf-bar{background:var(--b);color:rgba(255,255,255,.7);text-align:center;padding:8px 2rem;font-size:11px;font-weight:500;letter-spacing:.05em;display:flex;align-items:center;justify-content:center;gap:10px;position:sticky;top:60px;z-index:299}
+.conf-bar strong{color:#fff}
+
+/* HERO */
+.hero{position:relative;height:100vh;min-height:580px;max-height:820px;background:#f4f4f2;overflow:hidden;border-bottom:1px solid var(--bd)}
+.hero-copy{position:absolute;top:50%;left:50%;transform:translate(-50%,-55%);text-align:center;z-index:20;pointer-events:none}
+.hero-eyebrow{font-size:11px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--g500);margin-bottom:1.2rem;border-bottom:1px solid var(--g300);padding-bottom:8px;display:inline-block}
+.hero-title{font-size:clamp(3rem,7vw,5.5rem);font-weight:700;letter-spacing:-.04em;line-height:.92;color:var(--b);mix-blend-mode:multiply}
+.hero-title .muted{color:var(--g300);font-weight:300}
+.ground{position:absolute;bottom:100px;left:0;right:0;height:1px;background:rgba(0,0,0,.1)}
+.chars{position:absolute;bottom:100px;left:0;right:0;height:440px;pointer-events:none}
+.char-walker{position:absolute;bottom:0;display:flex;flex-direction:column;align-items:center}
+.bubble{position:absolute;bottom:calc(100% + 28px);left:50%;transform:translateX(-50%);background:var(--b);color:var(--w);font-size:11px;font-weight:500;padding:6px 12px;border-radius:12px 12px 12px 2px;white-space:nowrap;opacity:0;transition:opacity .3s;pointer-events:none}
+.bubble.show{opacity:1}
+.bubble::after{content:'';position:absolute;bottom:-6px;left:14px;width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:6px solid var(--b)}
+.scroll-cue{position:absolute;bottom:1.5rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:5px;font-size:9px;letter-spacing:.12em;color:var(--g400);animation:bob 2.2s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(5px)}}
+.scroll-line{width:1px;height:22px;background:var(--g300)}
+@keyframes walkCycle{0%{transform:translateY(0)}25%{transform:translateY(-5px)}50%{transform:translateY(0)}75%{transform:translateY(-4px)}100%{transform:translateY(0)}}
+@keyframes laughBounce{0%,100%{transform:translateY(0)}25%{transform:translateY(-9px)}50%{transform:translateY(-2px)}75%{transform:translateY(-7px)}}
+@keyframes talkShake{0%,100%{transform:translateY(0) rotate(0)}30%{transform:translateY(-4px) rotate(.5deg)}70%{transform:translateY(-3px) rotate(-.5deg)}}
+@keyframes runCycle{0%{transform:translateY(0)}20%{transform:translateY(-12px)}40%{transform:translateY(-6px)}60%{transform:translateY(-14px)}80%{transform:translateY(-4px)}100%{transform:translateY(0)}}
+.anim-walk{animation:walkCycle .9s ease-in-out infinite}
+.anim-laugh{animation:laughBounce .7s ease-in-out infinite}
+.anim-talk{animation:talkShake 1.1s ease-in-out infinite}
+.anim-run{animation:runCycle .55s ease-in-out infinite}
+
+/* PLANS */
+.plans-section{padding:5rem 2.5rem 3rem;max-width:960px;margin:0 auto}
+.section-ey{font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--g400);margin-bottom:.7rem}
+.section-ttl{font-size:1.55rem;font-weight:700;letter-spacing:-.02em;margin-bottom:1.5rem}
+.info-banner{display:flex;align-items:flex-start;gap:1rem;background:var(--g50);border:1px solid var(--bd);border-radius:10px;padding:1rem 1.4rem;margin-bottom:2.5rem}
+.info-banner-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+.info-banner-title{font-size:12px;font-weight:600;color:var(--b);margin-bottom:3px}
+.info-banner-desc{font-size:12px;color:var(--g500);line-height:1.6}
+.plans-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;border:1px solid var(--bd);border-radius:12px;overflow:hidden;background:var(--bd)}
+
+/* PLAN CARD */
+.plan{background:var(--w);padding:2rem 1.8rem;cursor:pointer;transition:background .2s;position:relative}
+.plan:hover{background:var(--g50)}
+.plan.selected{background:var(--b)}
+.plan::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--b);transform:scaleX(0);transition:transform .3s cubic-bezier(.4,0,.2,1)}
+.plan.selected::before{transform:scaleX(1);background:var(--w)}
+.pl-ey{font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--g400);margin-bottom:.5rem;transition:color .2s}
+.plan.selected .pl-ey{color:rgba(255,255,255,.35)}
+.pl-name{font-size:1.4rem;font-weight:700;letter-spacing:-.02em;margin-bottom:.25rem;transition:color .2s}
+.plan.selected .pl-name{color:var(--w)}
+.pl-tag{font-size:12px;color:var(--g500);line-height:1.5;margin-bottom:1.4rem;transition:color .2s}
+.plan.selected .pl-tag{color:rgba(255,255,255,.45)}
+.pl-pr-row{display:flex;align-items:baseline;gap:3px;margin-bottom:2px}
+.pl-pr{font-size:1.9rem;font-weight:700;letter-spacing:-.03em;color:var(--b);transition:color .2s}
+.plan.selected .pl-pr{color:var(--w)}
+.pl-sfx{font-size:12px;color:var(--g400);transition:color .2s}
+.plan.selected .pl-sfx{color:rgba(255,255,255,.3)}
+.pl-note{font-size:11px;color:var(--g400);margin-bottom:1.4rem;transition:color .2s}
+.plan.selected .pl-note{color:rgba(255,255,255,.28)}
+
+/* DURATION BOX */
+.dur-box{border:1px solid var(--bd);border-radius:8px;padding:.9rem 1rem;margin-bottom:1.4rem;transition:border-color .2s,background .2s}
+.plan.selected .dur-box{border-color:rgba(255,255,255,.14);background:rgba(255,255,255,.06)}
+.dur-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.7rem}
+.dur-lbl{font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--g400);transition:color .2s}
+.plan.selected .dur-lbl{color:rgba(255,255,255,.28)}
+.dur-vw{display:flex;align-items:baseline;gap:3px}
+.dur-v{font-size:1.25rem;font-weight:700;letter-spacing:-.02em;color:var(--b);transition:color .2s}
+.plan.selected .dur-v{color:var(--w)}
+.dur-u{font-size:11px;color:var(--g400);transition:color .2s}
+.plan.selected .dur-u{color:rgba(255,255,255,.28)}
+.dur-ex{font-size:10px;font-weight:500;color:var(--g500);opacity:0;transform:translateY(2px);transition:opacity .2s,transform .2s,color .2s;margin-left:4px}
+.dur-ex.on{opacity:1;transform:translateY(0)}
+.plan.selected .dur-ex{color:rgba(255,255,255,.5)}
+input[type=range]{-webkit-appearance:none;width:100%;height:1px;background:var(--bd);outline:none;cursor:pointer;border-radius:1px;transition:background .2s}
+.plan.selected input[type=range]{background:rgba(255,255,255,.2)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--b);cursor:pointer;border:2px solid var(--w);box-shadow:0 0 0 1px var(--g300);transition:transform .15s}
+.plan.selected input[type=range]::-webkit-slider-thumb{background:var(--w);border-color:var(--b);box-shadow:0 0 0 1px rgba(255,255,255,.3)}
+input[type=range]:active::-webkit-slider-thumb{transform:scale(1.3)}
+.dur-ticks{display:flex;justify-content:space-between;margin-top:5px;font-size:9px;color:var(--g400);transition:color .2s}
+.plan.selected .dur-ticks{color:rgba(255,255,255,.22)}
+
+/* PLAN BUTTON */
+.pl-btn{display:block;width:100%;padding:.65rem;border-radius:6px;font-family:'Pretendard',sans-serif;font-size:13px;font-weight:600;text-align:center;cursor:pointer;border:1px solid var(--bd);background:var(--w);color:var(--b);margin-bottom:1.4rem;transition:border-color .15s,background .15s}
+.pl-btn:hover{border-color:var(--b);background:var(--g50)}
+.plan.selected .pl-btn{background:var(--w);color:var(--b);border-color:var(--w)}
+.plan.selected .pl-btn:hover{background:rgba(255,255,255,.9)}
+
+/* FEATURES */
+.feat-hdr{font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--g400);margin-bottom:.7rem;transition:color .2s}
+.plan.selected .feat-hdr{color:rgba(255,255,255,.28)}
+.feat-list{list-style:none}
+.feat-item{display:flex;align-items:flex-start;gap:9px;padding:.45rem 0;border-top:1px solid var(--bd);font-size:12px;color:var(--g500);line-height:1.5;transition:color .2s,border-color .2s}
+.feat-item:first-child{border-top:none}
+.plan.selected .feat-item{color:rgba(255,255,255,.5);border-color:rgba(255,255,255,.08)}
+.fic{width:13px;height:13px;border-radius:50%;border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;transition:border-color .2s}
+.plan.selected .fic{border-color:rgba(255,255,255,.22)}
+.feat-sub{font-size:10px;color:var(--g400);padding-left:22px;padding-bottom:3px;transition:color .2s}
+.plan.selected .feat-sub{color:rgba(255,255,255,.22)}
+
+/* PROMO BUNDLES */
+.opt-bundle-label{display:flex;align-items:center;gap:7px;font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--g400);margin-bottom:.7rem;margin-top:1.4rem;padding-top:1.2rem;border-top:1px solid var(--bd)}
+.plan.selected .opt-bundle-label{color:rgba(255,255,255,.28);border-color:rgba(255,255,255,.08)}
+.promo-tag{display:inline-flex;align-items:center;font-size:9px;font-weight:700;letter-spacing:.08em;padding:2px 7px;border-radius:100px;background:#fef08a;color:#713f12;border:1px solid #fde047;text-transform:uppercase}
+.opt-bundles{display:flex;flex-direction:column;gap:6px;margin-bottom:.5rem}
+.opt-bundle{display:flex;align-items:center;justify-content:space-between;padding:.65rem 1rem;border:1px solid var(--bd);border-radius:7px;cursor:pointer;background:var(--g50);transition:border-color .18s,background .18s;gap:.6rem}
+.opt-bundle:hover{border-color:var(--g300);background:var(--w)}
+.opt-bundle.active{border-color:var(--b);background:var(--b)}
+.plan.selected .opt-bundle{border-color:rgba(255,255,255,.12);background:rgba(255,255,255,.06)}
+.plan.selected .opt-bundle:hover{border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.1)}
+.plan.selected .opt-bundle.active{border-color:var(--w);background:rgba(255,255,255,.18)}
+.ob-left{display:flex;flex-direction:column;gap:2px}
+.ob-title{font-size:12px;font-weight:600;color:var(--b);transition:color .18s}
+.opt-bundle.active .ob-title{color:var(--w)}
+.plan.selected .ob-title{color:rgba(255,255,255,.75)}
+.plan.selected .opt-bundle.active .ob-title{color:var(--w)}
+.ob-desc{font-size:10px;color:var(--g500);transition:color .18s}
+.opt-bundle.active .ob-desc{color:rgba(255,255,255,.45)}
+.plan.selected .ob-desc{color:rgba(255,255,255,.3)}
+.ob-price{font-size:13px;font-weight:700;color:var(--b);white-space:nowrap;transition:color .18s;flex-shrink:0}
+.opt-bundle.active .ob-price{color:var(--w)}
+.plan.selected .ob-price{color:rgba(255,255,255,.7)}
+.plan.selected .opt-bundle.active .ob-price{color:var(--w)}
+.ob-tag{display:inline-block;font-size:9px;font-weight:600;letter-spacing:.06em;padding:1px 6px;border-radius:3px;margin-left:5px;vertical-align:middle;background:var(--b);color:var(--w)}
+.opt-bundle.active .ob-tag{background:rgba(255,255,255,.2);color:var(--w)}
+.ob-radio{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--g300);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:border-color .18s,background .18s}
+.opt-bundle.active .ob-radio{border-color:rgba(255,255,255,.6);background:rgba(255,255,255,.15)}
+.ob-dot{width:9px;height:7px;opacity:0;transition:opacity .18s}
+.opt-bundle.active .ob-dot{opacity:1}
+
+/* ADDONS SECTION */
+.add-section{max-width:960px;margin:0 auto;padding:0 2.5rem 4rem}
+.add-hdr{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:1rem}
+.add-ttl{font-size:13px;font-weight:600}
+.add-sub{font-size:11px;color:var(--g400)}
+.add-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;border:1px solid var(--bd);border-radius:10px;overflow:hidden;background:var(--bd)}
+.add-row{display:flex;align-items:center;justify-content:space-between;padding:.9rem 1.2rem;background:var(--w);cursor:pointer;transition:background .15s;gap:1rem}
+.add-row:hover{background:var(--g50)}
+.add-row.on{background:var(--b)}
+.add-l{display:flex;flex-direction:column;gap:2px}
+.add-name{font-size:13px;font-weight:500;color:var(--b);transition:color .2s}
+.add-row.on .add-name{color:var(--w)}
+.add-desc{font-size:11px;color:var(--g400);transition:color .2s}
+.add-row.on .add-desc{color:rgba(255,255,255,.32)}
+.add-r{display:flex;align-items:center;gap:9px;flex-shrink:0}
+.add-price{font-size:12px;font-weight:500;color:var(--g400);white-space:nowrap;transition:color .2s}
+.add-row.on .add-price{color:rgba(255,255,255,.55)}
+.tog{width:32px;height:18px;border-radius:9px;border:1px solid var(--bd);background:var(--g100);position:relative;flex-shrink:0;transition:background .2s,border-color .2s}
+.tog::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:var(--g400);transition:transform .2s cubic-bezier(.34,1.56,.64,1),background .2s}
+.add-row.on .tog{background:var(--w);border-color:rgba(255,255,255,.25)}
+.add-row.on .tog::after{transform:translateX(14px);background:var(--b)}
+
+/* IMG BUNDLES */
+.img-bundle-section{margin-top:2rem}
+.img-bundle-hdr{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:1rem}
+.img-bundle-ttl{font-size:13px;font-weight:600}
+.img-bundle-sub{font-size:11px;color:var(--g400)}
+.placeholder-row{background:var(--g50);border:1px solid var(--bd);border-radius:10px;padding:1.1rem 1.4rem;font-size:13px;color:var(--g400)}
+
+/* IMG CALCULATOR */
+.img-calc-section{max-width:960px;margin:0 auto;padding:0 2.5rem 4rem}
+.img-calc-hdr{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:1.5rem}
+.img-calc-ttl{font-size:1.4rem;font-weight:700;letter-spacing:-.02em}
+.img-calc-sub{font-size:12px;color:var(--g400)}
+.img-calc-box{border:1px solid var(--bd);border-radius:12px;overflow:hidden}
+.img-calc-top{padding:2rem;border-bottom:1px solid var(--bd)}
+.img-calc-row{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:1.5rem}
+.img-cut-label{font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--g400);margin-bottom:.5rem}
+.img-cut-val{font-size:2.2rem;font-weight:700;letter-spacing:-.03em;color:var(--b)}
+.img-cut-unit{font-size:13px;color:var(--g400);margin-left:4px}
+.img-bonus-badge{display:none;margin-left:10px;font-size:10px;font-weight:600;background:#fef08a;color:#713f12;border:1px solid #fde047;padding:2px 10px;border-radius:100px}
+.img-total-label{font-size:10px;color:var(--g400);margin-bottom:3px;text-align:right}
+.img-total-price{font-size:1.5rem;font-weight:700;letter-spacing:-.03em;color:var(--b);text-align:right}
+.img-calc-info{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--bd)}
+.img-info-box{background:var(--w);padding:1.2rem 1.4rem}
+.img-info-title{font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--g400);margin-bottom:.8rem}
+.img-info-item{font-size:12px;color:var(--g500);padding:2px 0;display:flex;gap:8px}
+.img-info-item .dash{color:var(--g300);flex-shrink:0}
+.img-info-item.highlight{color:var(--b);font-weight:500}
+.img-info-sub{font-size:11px;color:var(--g400);padding-left:16px}
+
+/* FINAL CTA */
+.final-cta-section{max-width:960px;margin:0 auto;padding:0 2.5rem 6rem}
+.final-cta-box{background:var(--b);border-radius:14px;padding:2.5rem 3rem;display:flex;align-items:center;justify-content:space-between;gap:2rem}
+.final-cta-eyebrow{font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:.5rem}
+.final-cta-title{font-size:1.5rem;font-weight:700;letter-spacing:-.02em;color:#fff;margin-bottom:.35rem}
+.final-cta-desc{font-size:13px;color:rgba(255,255,255,.45);line-height:1.6}
+.final-cta-btns{display:flex;flex-direction:column;gap:10px;flex-shrink:0}
+.btn-download{padding:.85rem 1.8rem;background:#fff;color:var(--b);border:none;border-radius:8px;font-family:'Pretendard',sans-serif;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:8px;transition:background .15s}
+.btn-download:hover{background:#f0f0f0}
+.btn-inquire{padding:.85rem 1.8rem;background:transparent;color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:8px;font-family:'Pretendard',sans-serif;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;transition:border-color .15s}
+.btn-inquire:hover{border-color:rgba(255,255,255,.6)}
+
+/* SUM BAR */
+.sum-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.97);backdrop-filter:blur(20px);border-top:1px solid var(--bd);padding:.9rem 2.5rem;display:flex;align-items:center;justify-content:space-between;gap:2rem;z-index:300;transform:translateY(100%);transition:transform .4s cubic-bezier(.34,1.56,.64,1)}
+.sum-bar.show{transform:translateY(0)}
+.sum-l{display:flex;flex-direction:column;gap:2px}
+.sum-tier{font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--g400)}
+.sum-bd{font-size:11px;color:var(--g400);max-width:380px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sum-c{text-align:center}
+.sum-lbl{font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--g400);margin-bottom:1px}
+.sum-amt{font-size:1.75rem;font-weight:700;letter-spacing:-.03em;color:var(--b);display:inline-block;transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+.sum-amt.pop{transform:scale(1.06)}
+.sum-vat{font-size:10px;color:var(--g400)}
+.sum-btns{display:flex;gap:8px;flex-shrink:0}
+.sum-btn-dl{padding:.7rem 1.2rem;background:var(--g100);color:var(--b);border:1px solid var(--bd);border-radius:6px;font-family:'Pretendard',sans-serif;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;transition:background .15s}
+.sum-btn-dl:hover{background:var(--g200)}
+.sum-cta{padding:.7rem 1.6rem;background:var(--b);color:var(--w);border:none;border-radius:6px;font-family:'Pretendard',sans-serif;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;transition:background .15s}
+.sum-cta:hover{background:var(--g700)}
+</style>
+</head>
+<body>
+
+<nav>
+  <div>
+    <div class="nav-logo">YAGI</div>
+    <div class="nav-sub">AI Native Entertainment Studio</div>
+  </div>
+</nav>
+
+<div class="conf-bar">
+  <span>🔒</span>
+  본 자료는 <strong>YAGI 내부 가격 정책 자료</strong>로, 외부 유출 및 무단 배포를 금지합니다.
+  <span style="color:rgba(255,255,255,.25)">·</span>
+  <span style="color:rgba(255,255,255,.35)">CONFIDENTIAL — For Client Use Only</span>
+</div>
+
+<div class="hero" id="stage">
+  <div class="hero-copy">
+    <div class="hero-eyebrow">AI 콘텐츠 제작 · 영상 가격 정책</div>
+    <h1 class="hero-title">나의 영상,<br><span class="muted">얼마일까</span></h1>
+  </div>
+  <div class="ground"></div>
+  <div class="chars" id="chars"></div>
+  <div class="scroll-cue"><span>SCROLL</span><div class="scroll-line"></div></div>
+</div>
+
+<section class="plans-section">
+  <div class="section-ey">영상 제작 플랜</div>
+  <div class="section-ttl">어떤 영상이 필요하신가요?</div>
+  <div class="info-banner">
+    <div class="info-banner-icon">💡</div>
+    <div>
+      <div class="info-banner-title">정확한 견적 계산을 위해</div>
+      <div class="info-banner-desc">원하시는 플랜과 옵션을 모두 선택하신 후, 하단의 <strong>이 견적으로 문의하기</strong> 버튼을 통해 신청해 주세요. 이미지 단독 견적은 페이지 하단에서 확인하실 수 있습니다.</div>
+    </div>
+  </div>
+  <div class="plans-grid">
+
+    <!-- BASIC -->
+    <div class="plan" id="plan-basic" onclick="selectPlan('basic')">
+      <div class="pl-ey">Entry · Shortform</div>
+      <div class="pl-name">Basic</div>
+      <div class="pl-tag">15초 이내 숏폼<br>레퍼런스 기반 재현 영상</div>
+      <div class="pl-pr-row"><div class="pl-pr" id="price-basic">470,000</div><div class="pl-sfx">원~</div></div>
+      <div class="pl-note">기본금 470,000원 (10초) · +5초당 60,000원</div>
+      <div class="dur-box">
+        <div class="dur-top">
+          <div class="dur-lbl">납품 길이</div>
+          <div class="dur-vw"><div class="dur-v" id="dv-basic">10</div><div class="dur-u">초</div><span class="dur-ex" id="de-basic"></span></div>
+        </div>
+        <input type="range" id="sl-basic" min="5" max="15" step="5" value="10"
+          oninput="setDur('basic',this.value)" onclick="event.stopPropagation()">
+        <div class="dur-ticks"><span>5초</span><span>10초</span><span>15초</span></div>
+      </div>
+      <button class="pl-btn" onclick="event.stopPropagation();selectPlan('basic')">이 플랜 선택하기</button>
+      <div class="feat-hdr">포함 사항</div>
+      <ul class="feat-list">
+        <li class="feat-item"><div class="fic"><svg width="7" height="5" fill="none"><path d="M1 2.5l1.8 1.8 3.5-3.5" stroke="#a0a0a0" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>BGM 삽입 (라이브러리)</li>
+        <li class="feat-item"><div class="fic"><svg width="7" height="5" fill="none"><path d="M1 2.5l1.8 1.8 3.5-3.5" stroke="#a0a0a0" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>기본 톤 조정 · 단순 클립 구성</li>
+        <li class="feat-item"><div class="fic"><svg width="7" height="5" fill="none"><path d="M1 2.5l1.8 1.8 3.5-3.5" stroke="#a0a0a0" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>수정 1회 무료 · 초과 시 5만원/회 (부분수정)</li>
+        <li class="feat-item"><div class="fic"><svg width="7" height="5" fill="none"><path d="M1 2.5l1.8 1.8 3.5-3.5" stroke="#a0a0a0" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>전체수정 별도 협의</li>
+      </ul>
+    </div>
+
+    <!-- STANDARD -->
+    <div class="plan" id="plan-standard" onclick="selectPlan('standard')">
+      <div class="pl-ey">Mid · Midform</div>
+      <div class="pl-name">Standard</div>
+      <div class="pl-tag">60초 이내 미드폼<br>브랜드 맞춤 연출 영상</div>
+      <div class="pl-pr-row"><div class="pl-pr" id="price-standard">1,440,000</div><div class="pl-sfx">원~</div></div>
+      <div class="pl-note">기본금 1,440,000원 (30초) · +5초당 90,000원</div>
+      <div class="dur-box">
+        <div class="dur-top">
+          <div class="dur-lbl">납품 길이</div>
+          <div class="dur-vw"><div class="dur-v" id="dv-standard">30</div><div class="dur-u">초</div><span class="dur-ex" id="de-standard"></span></div>
+        </div>
+        <input type="range" id="sl-standard" min="15" max="60" step="5" value="30"
+          oninput="setDur('standard',this.value)" onclick="event.stopPropagation()">
+        <div class="dur-ticks"><span>15초</span><span>30초</span><span>45초</span><span>60초</span></div>
+      </div>
+      <button class="pl-btn" onclick="event.stopPropagation();selectPlan('standard')">이 플랜 선택하기</button>
+      <div class="feat-hdr">포함 사항</div>
+      <ul class="feat-list">
+        <li class="feat-item"><div class="fic"><svg width="7" height="5" fill="none"><path d="M1 2.5l1.8 1.8 3.5-3.5" stroke="#a0a0a0" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>브랜드 맞춤 컬러 그레이딩 · 리듬 기반 컷 편집</li>
+        <li class="feat-item"><div class="fic"><svg width="7" height="5" fill="none"><path d="M1 2.5l1.8 1.8 3.5-3.5" stroke="#a0a0a0" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>브랜드 전용 AI 인물 제작</li>
+        <li class="feat-item"><div class="fic"><svg width="7" height="5" fill="none"><path d="M1 2.5l1.8 1.8 3.5-3.5" stroke="#a0a0a0" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>브랜드 전용 AI 음원 · 효과음</li>
+        <li class="feat-item"><div class="fic"><svg width="7" height="5" fill="none"><path d="M1 2.5l1.8 1.8 3.5-3.5" stroke="#a0a0a0" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>이미지 에셋 <span style="color:var(--g400)">10장</span></li>
+        <li class="feat-item"><div class="fic"><svg width="7" height="5" fill="none"><path d="M1 2.5l1.8 1.8 3.5-3.5" stroke="#a0a0a0" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>규격 베리에이션 1개 무료 · 추가 +50,000원</li>
+        <li class="feat-item"><div class="fic"><svg width="7" height="5" fill="none"><path d="M1 2.5l1.8 1.8 3.5-3.5" stroke="#a0a0a0" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>수정 3회 무료 · 초과 시 5만원/회 (부분수정)</li>
+      </ul>
+      <div class="opt-bundle-label">15초 이내 숏폼 추가 옵션 <span class="promo-tag">PROMO</span></div>
+      <div class="opt-bundles">
+        <div class="opt-bundle" id="std-optA" onclick="event.stopPropagation();selectBundle('standard','A')">
+          <div class="ob-left"><div class="ob-title">Option A <span class="ob-tag">추천</span></div><div class="ob-desc">Standard + Basic 숏폼 1개 추가</div></div>
+          <div style="display:flex;align-items:center;gap:8px;flex-shrink:0"><div class="ob-price">+360,000원</div><div class="ob-radio"><svg class="ob-dot" width="9" height="7" viewBox="0 0 9 7" fill="none"><path d="M1 3l2.5 2.5L8 1" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        </div>
+        <div class="opt-bundle" id="std-optB" onclick="event.stopPropagation();selectBundle('standard','B')">
+          <div class="ob-left"><div class="ob-title">Option B</div><div class="ob-desc">Basic 숏폼 15초 × 2개</div></div>
+          <div style="display:flex;align-items:center;gap:8px;flex-shrink:0"><div class="ob-price">+680,000원</div><div class="ob-radio"><svg class="ob-dot" width="9" height="7" viewBox="0 0 9 7" fill="none"><path d="M1 3l2.5 2.5L8 1" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        </div>
+      </div>
+      <div class="opt-bundle-label" style="margin-top:0">추가 옵션</div>
+      <div class="opt-bundles">
+        <div class="opt-bundle" id="std-vidclip" onclick="event.stopPropagation();selectBundle('standard','VID')">
+          <div class="ob-left"><div class="ob-title">원본 영상 클립 더미</div><div class="ob-desc">제작 과정 원본 클립 에셋 제공</div></div>
+          <div style="display:flex;align-items:center;gap:8px;flex-shrink:0"><div class="ob-price">+50,000원</div><div class="ob-radio"><svg class="ob-dot" width="9" height="7" viewBox="0 0 9 7" fill="none"><path d="M1 3l2.5 2.5L8 1" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PREMIUM -->
+    <div class="plan" id="plan-premium" onclick="selectPlan('premium')">
+      <div class="pl-ey">Campaign · Longform</div>
+      <div class="pl-name">Premium</div>
+      <div class="pl-tag">30초~3분 롱폼<br>브랜드 캠페인 영상</div>
+      <div class="pl-pr-row"><div class="pl-pr" id="price-premium">3,400,000</div><div class="pl-sfx">원~</div></div>
+      <div class="pl-note">기본금 3,400,000원 (30초) · +5초당 150,000원</div>
+      <div class="dur-box">
+        <div class="dur-top">
+          <div class="dur-lbl">납품 길이</div>
+          <div class="dur-vw"><div class="dur-v" id="dv-premium">60</div><div class="dur-u">초</div><span class="dur-ex" id="de-premium"></span></div>
+        </div>
+        <input type="range" id="sl-premium" min="30" max="180" step="15" value="60"
+          oninput="setDur('premium',this.value)" onclick="event.stopPropagation()">
+        <div class="dur-ticks"><span>30초</span><span>60초</span><span>90초</span><span>120초</span><span>180초</span></div>
+      </div>
+      <button class="pl-btn" onclick="event.stopPropagation();selectPlan('premium')">이 플랜 선택하기</button>
+      <div class="feat-hdr">포함 사항</div>
+      <ul class="feat-list">
+        <li class="feat-item"><div class="fic"><svg width="7" height="5" fill="none"><path d="M1 2.5l1.8 1.8 3.5-3.5" stroke="#a0a0a0" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>브랜드 맞춤 컬러 그레이딩 · 리듬 기반 컷 편집</li>
+        <li class="feat-item"><div class="fic"><svg width="7" height="5" fill="none"><path d="M1 2.5l1.8 1.8 3.5-3.5" stroke="#a0a0a0" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>브랜드 전용 AI 인물 제작</li>
+        <li class="feat-item"><div class="fic"><svg width="7" height="5" fill="none"><path d="M1 2.5l1.8 1.8 3.5-3.5" stroke="#a0a0a0" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>브랜드 전용 AI 음원 · 효과음</li>
+        <li class="feat-item"><div class="fic"><svg width="7" height="5" fill="none"><path d="M1 2.5l1.8 1.8 3.5-3.5" stroke="#a0a0a0" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>이미지 에셋 <span style="color:var(--g400)">20장</span></li>
+        <li class="feat-item"><div class="fic"><svg width="7" height="5" fill="none"><path d="M1 2.5l1.8 1.8 3.5-3.5" stroke="#a0a0a0" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>원본 영상 클립 더미</li>
+        <li class="feat-item"><div class="fic"><svg width="7" height="5" fill="none"><path d="M1 2.5l1.8 1.8 3.5-3.5" stroke="#a0a0a0" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>시네마틱 컬러 마스터링 · 정밀 컷 연출</li>
+        <li class="feat-item"><div class="fic"><svg width="7" height="5" fill="none"><path d="M1 2.5l1.8 1.8 3.5-3.5" stroke="#a0a0a0" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>풀 사운드 디자인 · 음원 파일 제공</li>
+        <li class="feat-item"><div class="fic"><svg width="7" height="5" fill="none"><path d="M1 2.5l1.8 1.8 3.5-3.5" stroke="#a0a0a0" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>규격 베리에이션 2개 무료 · 추가 +50,000원</li>
+        <li class="feat-item"><div class="fic"><svg width="7" height="5" fill="none"><path d="M1 2.5l1.8 1.8 3.5-3.5" stroke="#a0a0a0" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>수정 5회 무료 · 초과 시 5만원/회 (부분수정)</li>
+      </ul>
+      <div class="opt-bundle-label">숏폼 추가 프로모션 <span class="promo-tag">PROMO</span></div>
+      <div class="opt-bundles">
+        <div class="opt-bundle" id="prem-optA" onclick="event.stopPropagation();selectBundle('premium','A')">
+          <div class="ob-left"><div class="ob-title">Basic 숏폼 1개 추가 <span class="ob-tag promo" style="background:#fef08a;color:#713f12;border:1px solid #fde047">27% OFF</span></div><div class="ob-desc">정가 410,000원 → 300,000원 (110,000원 할인)</div></div>
+          <div style="display:flex;align-items:center;gap:8px;flex-shrink:0"><div class="ob-price">+300,000원</div><div class="ob-radio"><svg class="ob-dot" width="9" height="7" viewBox="0 0 9 7" fill="none"><path d="M1 3l2.5 2.5L8 1" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ADDONS -->
+<section class="add-section">
+  <div class="add-hdr"><div class="add-ttl">추가 옵션</div><div class="add-sub">선택 후 하단 견적에 자동 반영</div></div>
+  <div class="add-grid">
+    <div class="add-row" onclick="toggleAddon(this,'ratio')">
+      <div class="add-l"><div class="add-name">추가 규격 베리에이션</div><div class="add-desc">1개 비율 무료 · 추가 1개당 50,000원</div></div>
+      <div class="add-r"><div class="add-price">+50,000원</div><div class="tog"></div></div>
+    </div>
+    <div class="add-row" onclick="toggleAddon(this,'rush')">
+      <div class="add-l"><div class="add-name">Rush 납품</div><div class="add-desc">의뢰일로부터 7일 이내 납품</div></div>
+      <div class="add-r"><div class="add-price">+500,000원</div><div class="tog"></div></div>
+    </div>
+    <div class="add-row" onclick="toggleAddon(this,'revP')">
+      <div class="add-l"><div class="add-name">추가 부분수정 <span id="rev-note" style="font-size:10px;color:var(--g400);font-weight:400"></span></div><div class="add-desc">기본 수정 횟수 초과 시</div></div>
+      <div class="add-r"><div class="add-price">+50,000원/회</div><div class="tog"></div></div>
+    </div>
+    <div class="add-row" id="asset-img-row" onclick="toggleAddon(this,'assetImg')" style="display:none">
+      <div class="add-l"><div class="add-name">이미지 에셋 <span style="font-size:10px;color:var(--g400);font-weight:400">20개 이상</span></div><div class="add-desc">B컷 이미지 에셋 제공</div></div>
+      <div class="add-r"><div class="add-price">별도 문의</div><div class="tog"></div></div>
+    </div>
+    <div class="add-row" id="asset-img-inc-row" style="cursor:default;display:none">
+      <div class="add-l"><div class="add-name" style="color:var(--g500)">이미지 에셋 <span style="font-size:10px;font-weight:400">20개 이상</span></div><div class="add-desc">Premium 기본 포함</div></div>
+      <div class="add-r"><div style="font-size:11px;font-weight:600;color:var(--g400);background:var(--g100);padding:2px 8px;border-radius:4px">포함</div></div>
+    </div>
+    <div class="add-row" id="asset-vid-row" onclick="toggleAddon(this,'assetVid')" style="display:none">
+      <div class="add-l"><div class="add-name">원본 영상 클립</div><div class="add-desc">원본 영상 클립 에셋 제공</div></div>
+      <div class="add-r"><div class="add-price">별도 문의</div><div class="tog"></div></div>
+    </div>
+    <div class="add-row" id="asset-vid-inc-row" style="cursor:default;display:none">
+      <div class="add-l"><div class="add-name" style="color:var(--g500)">원본 영상 클립</div><div class="add-desc">Premium 기본 포함</div></div>
+      <div class="add-r"><div style="font-size:11px;font-weight:600;color:var(--g400);background:var(--g100);padding:2px 8px;border-radius:4px">포함</div></div>
+    </div>
+    <div class="add-row" id="rfr" onclick="toggleAddon(this,'revF')" style="display:none">
+      <div class="add-l"><div class="add-name">추가 전체수정</div><div class="add-desc">Basic 전용 · 전면 재작업 필요 시</div></div>
+      <div class="add-r"><div class="add-price" style="color:var(--g400)">별도 협의</div><div class="tog"></div></div>
+    </div>
+    <div class="add-row" id="rfp" style="cursor:default;background:var(--g50)">
+      <div class="add-l"><div class="add-name" style="color:var(--g400)">추가 전체수정</div><div class="add-desc">Basic 플랜 선택 시 활성화</div></div>
+    </div>
+  </div>
+
+  <!-- IMG BUNDLE -->
+  <div class="img-bundle-section">
+    <div class="img-bundle-hdr">
+      <div class="img-bundle-ttl">영상 + AI 이미지 작업 번들 <span class="promo-tag" style="font-size:9px">할인</span></div>
+      <div class="img-bundle-sub">영상 플랜 선택 시 이미지 10컷 기준</div>
+    </div>
+    <div id="img-bundle-grid" style="display:none">
+      <div class="add-grid">
+        <div class="add-row" id="imgbundle-basic" onclick="toggleImgBundle(this,'basic')">
+          <div class="add-l"><div class="add-name">Basic + AI 이미지 10컷</div><div class="add-desc">정가 900,000원 <span style="color:#e05252;font-weight:600">-50,000원 할인</span></div></div>
+          <div class="add-r"><div class="add-price" style="font-size:14px;font-weight:700;color:var(--b)">850,000원</div><div class="tog"></div></div>
+        </div>
+        <div class="add-row" id="imgbundle-standard" onclick="toggleImgBundle(this,'standard')">
+          <div class="add-l"><div class="add-name">Standard + AI 이미지 10컷</div><div class="add-desc">정가 900,000원 <span style="color:#e05252;font-weight:600">-100,000원 할인</span></div></div>
+          <div class="add-r"><div class="add-price" style="font-size:14px;font-weight:700;color:var(--b)">800,000원</div><div class="tog"></div></div>
+        </div>
+        <div class="add-row" id="imgbundle-premium" onclick="toggleImgBundle(this,'premium')">
+          <div class="add-l"><div class="add-name">Premium + AI 이미지 10컷</div><div class="add-desc">정가 900,000원 <span style="color:#e05252;font-weight:600">-150,000원 할인</span></div></div>
+          <div class="add-r"><div class="add-price" style="font-size:14px;font-weight:700;color:var(--b)">750,000원</div><div class="tog"></div></div>
+        </div>
+        <div class="add-row" style="cursor:default;background:var(--g50)">
+          <div class="add-l"><div class="add-name" style="color:var(--g500);font-size:12px">※ 이미지 추가 컷 개당 90,000원</div><div class="add-desc">수정 2회 무료 · 전체 변경 별도 협의</div></div>
+        </div>
+      </div>
+    </div>
+    <div id="img-bundle-placeholder" class="placeholder-row">영상 플랜을 먼저 선택하면 해당 플랜 전용 이미지 번들 할인이 적용됩니다.</div>
+  </div>
+</section>
+
+<!-- IMAGE CALCULATOR -->
+<section class="img-calc-section">
+  <div style="border-top:1px solid var(--bd);padding-top:3rem;margin-bottom:2rem">
+    <div class="img-calc-hdr">
+      <div>
+        <div style="font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--g400);margin-bottom:.5rem">AI 이미지 제작</div>
+        <div class="img-calc-ttl">이미지 단독 견적</div>
+      </div>
+      <div class="img-calc-sub">컷당 90,000원 기준</div>
+    </div>
+  </div>
+  <div class="img-calc-box">
+    <div class="img-calc-top">
+      <div class="img-calc-row">
+        <div>
+          <div class="img-cut-label">납품 컷 수</div>
+          <div style="display:flex;align-items:baseline">
+            <span id="img-cut-val" class="img-cut-val">10</span>
+            <span class="img-cut-unit">컷</span>
+            <span id="img-bonus-badge" class="img-bonus-badge"></span>
+          </div>
+        </div>
+        <div>
+          <div class="img-total-label">예상 금액</div>
+          <div id="img-total-price" class="img-total-price">900,000원</div>
+        </div>
+      </div>
+      <input type="range" id="img-slider" min="10" max="50" step="1" value="10" oninput="updateImgCut(this.value)" style="-webkit-appearance:none;width:100%;height:1px;background:var(--bd);outline:none;cursor:pointer;border-radius:1px">
+      <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:9px;color:var(--g400)">
+        <span>10컷</span><span>20컷</span><span>30컷</span><span>40컷</span><span>50컷</span>
+      </div>
+    </div>
+    <div class="img-calc-info">
+      <div class="img-info-box">
+        <div class="img-info-title">포함 사항</div>
+        <div class="img-info-item"><span class="dash">—</span>컷당 A컷 기준 · 후보정 포함</div>
+        <div class="img-info-item"><span class="dash">—</span>수정 2회 무료 (부분수정)</div>
+        <div class="img-info-item"><span class="dash">—</span>전체 변경 별도 협의</div>
+        <div class="img-info-item"><span class="dash">—</span>고해상도 납품 (4k / 8k)</div>
+      </div>
+      <div class="img-info-box">
+        <div class="img-info-title">볼륨 혜택</div>
+        <div class="img-info-item"><span class="dash">—</span>10~29컷: 컷당 90,000원</div>
+        <div class="img-info-item highlight"><span style="color:#fde047">★</span>&nbsp;30컷 → +5컷 무료 납품</div>
+        <div class="img-info-item highlight"><span style="color:#fde047">★</span>&nbsp;40컷 → +7컷 무료 납품</div>
+        <div class="img-info-item highlight"><span style="color:#fde047">★</span>&nbsp;50컷 → +10컷 무료 납품</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final-cta-section">
+  <div class="final-cta-box">
+    <div>
+      <div class="final-cta-eyebrow">YAGI · 최종 견적</div>
+      <div class="final-cta-title">견적 계산이 완료되셨나요?</div>
+      <div class="final-cta-desc">선택하신 플랜과 옵션을 기반으로 견적서를 다운로드하거나 바로 문의하실 수 있습니다.</div>
+    </div>
+    <div class="final-cta-btns">
+      <button class="btn-download" onclick="downloadQuote()">
+        <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M7 1v8M4 6l3 3 3-3M2 11h10" stroke="#0a0a0a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        견적서 다운로드 (PDF)
+      </button>
+      <button class="btn-inquire" onclick="handleCTA()">이 견적으로 문의하기 →</button>
+    </div>
+  </div>
+</section>
+
+<!-- SUM BAR -->
+<div class="sum-bar" id="sum-bar">
+  <div class="sum-l"><div class="sum-tier" id="s-tier">—</div><div class="sum-bd" id="s-bd"></div></div>
+  <div class="sum-c"><div class="sum-lbl">예상 견적</div><div class="sum-amt" id="s-amt">—</div><div class="sum-vat">VAT 별도 · 최종 납품 후 후불</div></div>
+  <div class="sum-btns">
+    <button class="sum-btn-dl" onclick="downloadQuote()">견적서 ↓</button>
+    <button class="sum-cta" onclick="handleCTA()">이 견적으로 문의하기 →</button>
+  </div>
+</div>
+<script>
+// ── PRICING DATA ──
+var TIERS = {
+  basic:    {name:'Basic',    base:470000,  perFive:60000,  baseSec:10, rev:1},
+  standard: {name:'Standard', base:1440000, perFive:90000,  baseSec:30, rev:3},
+  premium:  {name:'Premium',  base:3400000, perFive:150000, baseSec:30, rev:5}
+};
+var ST = {
+  plan: null,
+  dur: {basic:10, standard:30, premium:30},
+  addons: {ratio:false, rush:false, revP:false, revF:false, assetImg:false, assetVid:false},
+  bundle: {standard: {A:false, B:false, VID:false}, premium: {A:false}}
+};
+
+function fmt(n) { return n.toLocaleString('ko-KR') + '원'; }
+function fmtS(n) {
+  if (n >= 10000) { var m = n/10000; return (m === Math.floor(m) ? m : m.toFixed(0)) + '만원'; }
+  return fmt(n);
+}
+function basicPrice(sec) { var base = 470000; var over = Math.max(0, sec - 10); return base + Math.ceil(over/5) * 60000; }
+
+// ── SELECT PLAN ──
+function selectPlan(p) {
+  ST.plan = p;
+  ['basic','standard','premium'].forEach(function(t) {
+    var el = document.getElementById('plan-' + t);
+    if (el) el.classList.toggle('selected', t === p);
+  });
+  var rfr = document.getElementById('rfr');
+  var rfp = document.getElementById('rfp');
+  if (p === 'basic') {
+    rfr.style.display = ''; rfp.style.display = 'none';
+  } else {
+    rfr.style.display = 'none'; rfp.style.display = '';
+    if (ST.addons.revF) { ST.addons.revF = false; rfr.classList.remove('on'); }
+  }
+  var isBasicOrStd = (p === 'basic' || p === 'standard');
+  var isPrem = (p === 'premium');
+  document.getElementById('asset-img-row').style.display = isBasicOrStd ? '' : 'none';
+  document.getElementById('asset-vid-row').style.display = isBasicOrStd ? '' : 'none';
+  document.getElementById('asset-img-inc-row').style.display = isPrem ? '' : 'none';
+  document.getElementById('asset-vid-inc-row').style.display = isPrem ? '' : 'none';
+  if (isPrem) {
+    ST.addons.assetImg = false; ST.addons.assetVid = false;
+    document.getElementById('asset-img-row').classList.remove('on');
+    document.getElementById('asset-vid-row').classList.remove('on');
+  }
+  var notes = {basic:'(기본 1회)', standard:'(기본 3회)', premium:'(기본 5회)'};
+  document.getElementById('rev-note').textContent = notes[p] || '';
+  document.getElementById('sum-bar').classList.add('show');
+  document.getElementById('img-bundle-grid').style.display = 'grid';
+  document.getElementById('img-bundle-placeholder').style.display = 'none';
+  ['basic','standard','premium'].forEach(function(t) {
+    var row = document.getElementById('imgbundle-' + t);
+    if (row) { row.style.opacity = t === p ? '1' : '0.4'; row.style.pointerEvents = t === p ? '' : 'none'; }
+  });
+  render();
+}
+
+// ── SELECT BUNDLE (다중 선택) ──
+function selectBundle(plan, key) {
+  if (plan === 'standard') {
+    ST.bundle.standard[key] = !ST.bundle.standard[key];
+    document.getElementById('std-optA').classList.toggle('active', ST.bundle.standard.A);
+    document.getElementById('std-optB').classList.toggle('active', ST.bundle.standard.B);
+    document.getElementById('std-vidclip').classList.toggle('active', ST.bundle.standard.VID);
+  }
+  if (plan === 'premium') {
+    ST.bundle.premium[key] = !ST.bundle.premium[key];
+    document.getElementById('prem-optA').classList.toggle('active', ST.bundle.premium.A);
+  }
+  if (ST.plan === plan) render();
+}
+
+// ── DURATION ──
+function setDur(plan, v) {
+  ST.dur[plan] = parseInt(v);
+  document.getElementById('dv-' + plan).textContent = v;
+  if (plan === 'basic') {
+    var price = basicPrice(parseInt(v));
+    var ex = document.getElementById('de-basic');
+    var extraSec = Math.max(0, parseInt(v) - 10); ex.textContent = extraSec > 0 ? '+' + (Math.ceil(extraSec/5)*60000).toLocaleString('ko-KR') + '원' : '';
+    if (extraSec > 0) ex.classList.add('on'); else ex.classList.remove('on');
+    document.getElementById('price-basic').textContent = price.toLocaleString('ko-KR');
+  } else {
+    var t = TIERS[plan];
+    var over = Math.max(0, ST.dur[plan] - t.baseSec);
+    var el = document.getElementById('de-' + plan);
+    if (over > 0) { var u = Math.ceil(over/5); el.textContent = '+' + fmtS(u * t.perFive); el.classList.add('on'); }
+    else { el.classList.remove('on'); }
+    cardPrice(plan);
+  }
+  if (ST.plan === plan) render();
+}
+
+function cardPrice(plan) {
+  if (plan === 'basic') { document.getElementById('price-basic').textContent = basicPrice(ST.dur.basic).toLocaleString('ko-KR'); return; }
+  var t = TIERS[plan];
+  var over = Math.max(0, ST.dur[plan] - t.baseSec);
+  var u = Math.ceil(over/5);
+  document.getElementById('price-' + plan).textContent = (t.base + u * t.perFive).toLocaleString('ko-KR');
+}
+
+// ── TOGGLE ADDON ──
+function toggleAddon(el, key) {
+  ST.addons[key] = !ST.addons[key];
+  el.classList.toggle('on', ST.addons[key]);
+  if (ST.plan) render();
+}
+
+// ── IMG BUNDLE ──
+var IMG_BUNDLES = {basic:false, standard:false, premium:false};
+function toggleImgBundle(el, plan) {
+  ['basic','standard','premium'].forEach(function(p) {
+    IMG_BUNDLES[p] = false;
+    var r = document.getElementById('imgbundle-' + p);
+    if (r) r.classList.remove('on');
+  });
+  IMG_BUNDLES[plan] = !IMG_BUNDLES[plan];
+  el.classList.toggle('on', IMG_BUNDLES[plan]);
+}
+
+// ── RENDER ──
+function render() {
+  if (!ST.plan) return;
+  var p = ST.plan, t = TIERS[p];
+  var base = 0;
+  if (p === 'basic') { base = basicPrice(ST.dur.basic); }
+  else { var over = Math.max(0, ST.dur[p] - t.baseSec); base = t.base + Math.ceil(over/5) * t.perFive; }
+  var bundleLabels = [];
+  if (p === 'standard') {
+    if (ST.bundle.standard.A)   { base = base + 360000; bundleLabels.push('옵션A +36만원'); }
+    if (ST.bundle.standard.B)   { base = base + 680000; bundleLabels.push('옵션B +68만원'); }
+    if (ST.bundle.standard.VID) { base = base + 50000;  bundleLabels.push('영상클립 +5만원'); }
+  }
+  if (p === 'premium' && ST.bundle.premium.A) { base = base + 300000; bundleLabels.push('숏폼 +30만원'); }
+  var bundleLabel = bundleLabels.join(', ');
+  var ratE = ST.addons.ratio ? 50000 : 0;
+  var rushE = ST.addons.rush ? 500000 : 0;
+  var revE = ST.addons.revP ? 50000 : 0;
+  var total = base + ratE + rushE + revE;
+  document.getElementById('price-' + p).textContent = total.toLocaleString('ko-KR');
+  document.getElementById('s-tier').textContent = t.name + ' · ' + ST.dur[p] + '초' + (bundleLabel ? ' · ' + bundleLabel : '');
+  var parts = [fmtS(base) + (bundleLabel ? ' (' + bundleLabel + ')' : ' 기본금')];
+  if (ratE) parts.push('+' + fmtS(ratE) + ' 비율');
+  if (rushE) parts.push('+' + fmtS(rushE) + ' Rush');
+  if (revE) parts.push('+' + fmtS(revE) + ' 부분수정');
+  document.getElementById('s-bd').textContent = parts.join('  ');
+  var amtEl = document.getElementById('s-amt');
+  amtEl.textContent = fmt(total) + (ST.addons.revF && p === 'basic' ? ' +α' : '');
+  amtEl.classList.remove('pop'); void amtEl.offsetWidth; amtEl.classList.add('pop');
+  setTimeout(function() { amtEl.classList.remove('pop'); }, 320);
+}
+
+// ── IMG CALCULATOR ──
+function updateImgCut(v) {
+  var cuts = parseInt(v);
+  document.getElementById('img-cut-val').textContent = cuts;
+  var base = cuts * 90000;
+  var bonus = 0;
+  if (cuts >= 50) bonus = 10;
+  else if (cuts >= 40) bonus = 7;
+  else if (cuts >= 30) bonus = 5;
+  var badge = document.getElementById('img-bonus-badge');
+  if (bonus > 0) { badge.textContent = '+' + bonus + '컷 보너스 납품'; badge.style.display = 'inline-block'; }
+  else { badge.style.display = 'none'; }
+  document.getElementById('img-total-price').textContent = base.toLocaleString('ko-KR') + '원';
+}
+
+// ── CTA & DOWNLOAD ──
+function handleCTA() {
+  if (!ST.plan) { alert('플랜을 먼저 선택해주세요.'); return; }
+  var p = ST.plan, t = TIERS[p];
+  var sec = ST.dur[p];
+  var base = p === 'basic' ? basicPrice(sec) : (function() { var over = Math.max(0, sec - t.baseSec); return t.base + Math.ceil(over/5) * t.perFive; })();
+  var bundleNote = '';
+  var bundleNotes = [];
+  if (p === 'standard' && ST.bundle.standard.A)   { base = base + 360000; bundleNotes.push('옵션A (+36만원)'); }
+  if (p === 'standard' && ST.bundle.standard.B)   { base = base + 680000; bundleNotes.push('옵션B (+68만원)'); }
+  if (p === 'standard' && ST.bundle.standard.VID) { base = base + 50000;  bundleNotes.push('영상 클립 더미 (+5만원)'); }
+  if (p === 'premium'  && ST.bundle.premium.A)    { base = base + 300000; bundleNotes.push('숏폼 추가 (+30만원, 27% 할인)'); }
+  var bundleNote = bundleNotes.length ? '\n번들: ' + bundleNotes.join(' + ') : '';
+  var total = base + (ST.addons.ratio?50000:0) + (ST.addons.rush?500000:0) + (ST.addons.revP?50000:0);
+  alert('[YAGI 영상 제작 문의]\n─────────────────\n플랜: ' + t.name + '\n납품 길이: ' + sec + '초' + bundleNote + '\nRush: ' + (ST.addons.rush?'예 (7일)':'아니오') + '\n─────────────────\n예상 견적: ' + fmt(total) + ' (VAT 별도)');
+}
+
+function downloadQuote() {
+  if (!ST.plan) { alert('플랜을 먼저 선택해주세요.'); return; }
+  var p = ST.plan, t = TIERS[p], sec = ST.dur[p];
+  var base = p === 'basic' ? basicPrice(sec) : (function() { var over = Math.max(0, sec - t.baseSec); return t.base + Math.ceil(over/5) * t.perFive; })();
+  var bundleNote = '';
+  var bundleItems = [];
+  if (p === 'standard' && ST.bundle.standard.A)   { base = base + 360000; bundleItems.push('Option A — Basic 숏폼 1개 (+36만원)'); }
+  if (p === 'standard' && ST.bundle.standard.B)   { base = base + 680000; bundleItems.push('Option B — Basic 숏폼 15초×2개 (+68만원)'); }
+  if (p === 'standard' && ST.bundle.standard.VID) { base = base + 50000;  bundleItems.push('원본 영상 클립 더미 (+5만원)'); }
+  if (p === 'premium'  && ST.bundle.premium.A)    { base = base + 300000; bundleItems.push('숏폼 추가 프로모션 (+30만원, 27% 할인)'); }
+  var bundleNote = bundleItems.join(' / ');
+  var ratE = ST.addons.ratio?50000:0, rushE = ST.addons.rush?500000:0, revE = ST.addons.revP?50000:0;
+  var total = base + ratE + rushE + revE;
+  var today = new Date().toLocaleDateString('ko-KR', {year:'numeric',month:'2-digit',day:'2-digit'});
+  var rows = [['플랜', t.name], ['납품 길이', sec + '초']];
+  if (bundleNote) rows.push(['번들', bundleNote]);
+  else rows.push(['기본금', fmt(base)]);
+  if (ratE) rows.push(['추가 규격 베리에이션', '+' + fmt(ratE)]);
+  if (rushE) rows.push(['Rush 납품 (7일 이내)', '+' + fmt(rushE)]);
+  if (revE) rows.push(['추가 부분수정 (1회)', '+' + fmt(revE)]);
+  var tableRows = rows.map(function(r) {
+    return '<tr><td style="padding:10px 16px;font-size:13px;color:#737373;border-bottom:1px solid #f0f0f0;width:50%">' + r[0] + '</td><td style="padding:10px 16px;font-size:13px;color:#0a0a0a;font-weight:500;border-bottom:1px solid #f0f0f0;text-align:right">' + r[1] + '</td></tr>';
+  }).join('');
+  var html = '<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><title>YAGI 견적서</title><link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet"><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Pretendard,sans-serif;background:#fff;color:#0a0a0a;padding:60px;max-width:720px;margin:0 auto}</style></head><body><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:48px"><div><div style="font-size:22px;font-weight:700;letter-spacing:.1em;margin-bottom:4px">YAGI</div><div style="font-size:11px;color:#a0a0a0;letter-spacing:.06em">AI NATIVE ENTERTAINMENT STUDIO</div></div><div style="text-align:right"><div style="font-size:11px;color:#a0a0a0;margin-bottom:2px">견적 발행일</div><div style="font-size:13px;font-weight:500">' + today + '</div></div></div><div style="border-top:2px solid #0a0a0a;padding-top:24px;margin-bottom:32px"><div style="font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:#a0a0a0;margin-bottom:8px">영상 제작 견적서</div><div style="font-size:28px;font-weight:700;letter-spacing:-.02em">' + t.name + ' 플랜 · ' + sec + '초</div></div><table style="width:100%;border-collapse:collapse;border:1px solid #e5e5e5;border-radius:10px;overflow:hidden">' + tableRows + '<tr style="background:#0a0a0a"><td style="padding:14px 16px;font-size:13px;font-weight:600;color:rgba(255,255,255,.6)">최종 견적 (VAT 별도)</td><td style="padding:14px 16px;font-size:18px;font-weight:700;color:#fff;text-align:right">' + fmt(total) + '</td></tr></table><div style="margin-top:16px;padding:14px 16px;background:#f9f9f9;border-radius:8px;font-size:11px;color:#a0a0a0;line-height:1.8">· 모든 금액은 부가세(VAT) 별도입니다.<br>· 최종 금액은 브리프 확인 후 달라질 수 있습니다.<br>· 결제는 최종 납품물 확인 후 후불로 진행됩니다.<br>· 본 견적서는 YAGI 내부 가격 정책 자료로 외부 무단 유출을 금지합니다.</div><div style="margin-top:48px;padding-top:24px;border-top:1px solid #e5e5e5;display:flex;justify-content:space-between"><div style="font-size:11px;color:#a0a0a0">YAGI · AI Native Entertainment Studio</div><div style="font-size:11px;color:#a0a0a0">CONFIDENTIAL</div></div><script>window.onload=function(){window.print();}<\/script></body></html>';
+  var blob = new Blob([html], {type:'text/html'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = 'YAGI_견적서_' + t.name + '_' + today.replace(/\./g,'') + '.html';
+  a.click(); URL.revokeObjectURL(url);
+}
+
+// ── CHARACTERS ──
+var SPEECHES = {
+  talk: ['야 이거 어때?','진짜 잘 나왔다','AI가 만든 거야?','대박 아니냐','올해 최고컷!','이걸 그냥 써!','완전 실사임','이게 AI라고?'],
+  laugh: ['ㅋㅋㅋㅋㅋ','하하하!!','웃겨 ㅋㅋ','진짜요? ㅋㅋ']
+};
+
+function makeSVG(type, h) {
+  var w = Math.round(h * 0.32), cx = Math.round(w / 2);
+  var hr = Math.round(h * 0.075);
+  var headCY = Math.round(h * 0.09);
+  var skins = ['#d4a98a','#c8956b','#e8c9a8','#c49070'];
+  var hairs = ['#1a1208','#1a1a1a','#0d0d0d','#1a1a1a'];
+  var sk = skins[type], hair = hairs[type];
+  var neckT = Math.round(h*0.162), neckB = Math.round(h*0.196), neckW = Math.round(w*0.13);
+  var sY = Math.round(h*0.20), chB = Math.round(h*0.48), hipY = Math.round(h*0.52);
+  var kneeY = Math.round(h*0.70), ankleY = Math.round(h*0.88), footY = Math.round(h*0.94);
+  var shadow = '<ellipse cx="'+cx+'" cy="'+h+'" rx="'+(w*0.38)+'" ry="'+(h*0.013)+'" fill="rgba(0,0,0,.08)"/>';
+  var neck = '<rect x="'+(cx-neckW/2)+'" y="'+neckT+'" width="'+neckW+'" height="'+(neckB-neckT)+'" rx="3" fill="'+sk+'"/>';
+  var head = '<ellipse cx="'+cx+'" cy="'+headCY+'" rx="'+hr+'" ry="'+(Math.round(hr*1.12))+'" fill="'+sk+'"/>';
+  var earL = '<ellipse cx="'+(cx-hr-2)+'" cy="'+(headCY+3)+'" rx="4" ry="6" fill="'+sk+'"/>';
+  var earR = '<ellipse cx="'+(cx+hr+2)+'" cy="'+(headCY+3)+'" rx="4" ry="6" fill="'+sk+'"/>';
+  var eyY = headCY + 2;
+  var eyeL = '<ellipse cx="'+(cx-hr*0.38)+'" cy="'+eyY+'" rx="'+(hr*0.18)+'" ry="'+(hr*0.22)+'" fill="#1a1a1a"/>';
+  var eyeR = '<ellipse cx="'+(cx+hr*0.38)+'" cy="'+eyY+'" rx="'+(hr*0.18)+'" ry="'+(hr*0.22)+'" fill="#1a1a1a"/>';
+  var hilL = '<circle cx="'+(cx-hr*0.32)+'" cy="'+(eyY-1)+'" r="1.5" fill="white"/>';
+  var hilR = '<circle cx="'+(cx+hr*0.44)+'" cy="'+(eyY-1)+'" r="1.5" fill="white"/>';
+  var browY = headCY - hr * 0.28;
+  var brow = type===1
+    ? '<path d="M'+(cx-hr*0.52)+' '+browY+' Q'+(cx-hr*0.34)+' '+(browY-3)+' '+(cx-hr*0.16)+' '+browY+'" stroke="#1a1a1a" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M'+(cx+hr*0.16)+' '+browY+' Q'+(cx+hr*0.34)+' '+(browY-3)+' '+(cx+hr*0.52)+' '+browY+'" stroke="#1a1a1a" stroke-width="1.5" fill="none" stroke-linecap="round"/>'
+    : '<line x1="'+(cx-hr*0.54)+'" y1="'+browY+'" x2="'+(cx-hr*0.16)+'" y2="'+(browY-1)+'" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/><line x1="'+(cx+hr*0.16)+'" y1="'+(browY-1)+'" x2="'+(cx+hr*0.54)+'" y2="'+browY+'" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>';
+  var mouthY = headCY + hr * 0.5;
+  var mouth = type===1
+    ? '<path d="M'+(cx-hr*0.32)+' '+mouthY+' Q'+cx+' '+(mouthY+hr*0.28)+' '+(cx+hr*0.32)+' '+mouthY+'" stroke="#1a1a1a" stroke-width="1.4" fill="rgba(200,100,80,.2)" stroke-linecap="round"/>'
+    : '<path d="M'+(cx-hr*0.2)+' '+mouthY+' Q'+cx+' '+(mouthY+hr*0.15)+' '+(cx+hr*0.2)+' '+mouthY+'" stroke="#b07878" stroke-width="1.2" fill="none" stroke-linecap="round"/>';
+  var hairBase, hairFront;
+  if (type===0) {
+    hairBase = '<ellipse cx="'+cx+'" cy="'+(headCY-hr*0.1)+'" rx="'+(hr+5)+'" ry="'+(hr+7)+'" fill="'+hair+'"/>'
+      +'<rect x="'+(cx-hr-4)+'" y="'+headCY+'" width="'+(hr*0.9)+'" height="'+(h*0.38)+'" rx="6" fill="'+hair+'"/>'
+      +'<rect x="'+(cx+hr*0.2)+'" y="'+headCY+'" width="'+(hr*0.9)+'" height="'+(h*0.35)+'" rx="6" fill="'+hair+'"/>';
+    hairFront = '<ellipse cx="'+cx+'" cy="'+(headCY-hr*0.72)+'" rx="'+(hr+2)+'" ry="'+(hr*0.45)+'" fill="'+hair+'"/>';
+  } else if (type===1) {
+    hairBase = '<ellipse cx="'+cx+'" cy="'+(headCY-hr*0.05)+'" rx="'+(hr+5)+'" ry="'+(hr+5)+'" fill="'+hair+'"/>'
+      +'<ellipse cx="'+(cx-hr*0.6)+'" cy="'+(headCY-hr*0.8)+'" rx="'+(hr*0.75)+'" ry="'+(hr*0.55)+'" fill="'+hair+'"/>'
+      +'<ellipse cx="'+(cx+hr*0.6)+'" cy="'+(headCY-hr*0.85)+'" rx="'+(hr*0.75)+'" ry="'+(hr*0.5)+'" fill="'+hair+'"/>'
+      +'<ellipse cx="'+cx+'" cy="'+(headCY-hr*1.0)+'" rx="'+(hr*0.6)+'" ry="'+(hr*0.45)+'" fill="'+hair+'"/>';
+    hairFront = '<ellipse cx="'+cx+'" cy="'+(headCY-hr*0.68)+'" rx="'+(hr+1)+'" ry="'+(hr*0.42)+'" fill="'+hair+'"/>';
+  } else if (type===2) {
+    hairBase = '<ellipse cx="'+cx+'" cy="'+(headCY-hr*0.05)+'" rx="'+(hr+4)+'" ry="'+(hr+6)+'" fill="'+hair+'"/>'
+      +'<rect x="'+(cx-hr-3)+'" y="'+headCY+'" width="'+(hr*0.95)+'" height="'+(h*0.45)+'" rx="5" fill="'+hair+'"/>'
+      +'<rect x="'+(cx+hr*0.1)+'" y="'+headCY+'" width="'+(hr*0.95)+'" height="'+(h*0.42)+'" rx="5" fill="'+hair+'"/>';
+    hairFront = '<ellipse cx="'+cx+'" cy="'+(headCY-hr*0.68)+'" rx="'+(hr+1)+'" ry="'+(hr*0.42)+'" fill="'+hair+'"/>';
+  } else {
+    hairBase = '<ellipse cx="'+cx+'" cy="'+(headCY-hr*0.05)+'" rx="'+(hr+4)+'" ry="'+(hr+5)+'" fill="'+hair+'"/>';
+    hairFront = '<ellipse cx="'+cx+'" cy="'+(headCY-hr*0.68)+'" rx="'+(hr+1)+'" ry="'+(hr*0.42)+'" fill="'+hair+'"/>'
+      +'<path d="M'+(cx-hr*0.9)+' '+(headCY-hr*0.3)+' Q'+(cx-hr*0.4)+' '+(headCY-hr*0.7)+' '+(cx+hr*0.1)+' '+(headCY-hr*0.45)+' Q'+(cx+hr*0.6)+' '+(headCY-hr*0.7)+' '+(cx+hr*0.85)+' '+(headCY-hr*0.25)+'" stroke="'+hair+'" stroke-width="'+(hr*0.45)+'" fill="none" stroke-linecap="round"/>';
+  }
+  var body, arms, legs, shoes;
+  var armW = Math.round(w*0.12), legW = Math.round(w*0.16);
+  if (type===0) {
+    var jW = Math.round(w*0.78);
+    body = '<rect x="'+(cx-jW/2)+'" y="'+sY+'" width="'+jW+'" height="'+(chB-sY)+'" rx="3" fill="#1e1e1e"/>'
+      +'<path d="M'+(cx-jW*0.14)+' '+sY+' L'+cx+' '+(hipY-h*0.06)+' L'+(cx+jW*0.14)+' '+sY+'" stroke="#444" stroke-width="1.5" fill="none"/>'
+      +'<rect x="'+(cx-jW*0.14)+'" y="'+(hipY-h*0.06)+'" width="'+(jW*0.28)+'" height="'+(h*0.055)+'" rx="2" fill="#2a2a2a"/>';
+    arms = '<rect x="'+(cx-jW/2-armW)+'" y="'+sY+'" width="'+armW+'" height="'+(h*0.26)+'" rx="'+(armW/2)+'" fill="#1e1e1e"/>'
+      +'<rect x="'+(cx+jW/2)+'" y="'+sY+'" width="'+armW+'" height="'+(h*0.26)+'" rx="'+(armW/2)+'" fill="#1e1e1e"/>';
+    legs = '<path d="M'+(cx-jW*0.32)+' '+chB+' L'+(cx-jW*0.36)+' '+hipY+' L'+(cx+jW*0.36)+' '+hipY+' L'+(cx+jW*0.32)+' '+chB+' Z" fill="#2a2a2a"/>'
+      +'<rect x="'+(cx-legW-4)+'" y="'+hipY+'" width="'+legW+'" height="'+(ankleY-hipY)+'" rx="'+(legW/2)+'" fill="'+sk+'"/>'
+      +'<rect x="'+(cx+4)+'" y="'+hipY+'" width="'+legW+'" height="'+(ankleY-hipY)+'" rx="'+(legW/2)+'" fill="'+sk+'"/>';
+    shoes = '<rect x="'+(cx-legW-8)+'" y="'+ankleY+'" width="'+(legW+8)+'" height="'+(footY-ankleY)+'" rx="4" fill="#111"/>'
+      +'<rect x="'+cx+'" y="'+ankleY+'" width="'+(legW+8)+'" height="'+(footY-ankleY)+'" rx="4" fill="#111"/>'
+      +'<rect x="'+(cx-legW-12)+'" y="'+(footY-3)+'" width="'+(legW+12)+'" height="6" rx="3" fill="#0a0a0a"/>'
+      +'<rect x="'+(cx-4)+'" y="'+(footY-3)+'" width="'+(legW+12)+'" height="6" rx="3" fill="#0a0a0a"/>';
+  } else if (type===1) {
+    var hW = Math.round(w*0.88);
+    body = '<rect x="'+(cx-hW/2)+'" y="'+sY+'" width="'+hW+'" height="'+(chB-sY)+'" rx="3" fill="#d4d0cc"/>'
+      +'<rect x="'+(cx-hW*0.2)+'" y="'+(chB-h*0.05)+'" width="'+(hW*0.4)+'" height="'+(h*0.06)+'" rx="4" fill="rgba(0,0,0,.07)"/>';
+    arms = '<rect x="'+(cx-hW/2-armW*1.1)+'" y="'+sY+'" width="'+(armW*1.1)+'" height="'+(h*0.28)+'" rx="'+(armW/2)+'" fill="#d4d0cc"/>'
+      +'<rect x="'+(cx+hW/2)+'" y="'+sY+'" width="'+(armW*1.1)+'" height="'+(h*0.28)+'" rx="'+(armW/2)+'" fill="#d4d0cc"/>';
+    var wpW = Math.round(w*0.42);
+    legs = '<path d="M'+(cx-wpW)+' '+chB+' L'+(cx-wpW*1.1)+' '+ankleY+' L'+(cx-wpW*0.1)+' '+ankleY+' L'+cx+' '+kneeY+' Z" fill="#2d2d2d"/>'
+      +'<path d="M'+(cx+wpW)+' '+chB+' L'+(cx+wpW*1.1)+' '+ankleY+' L'+(cx+wpW*0.1)+' '+ankleY+' L'+cx+' '+kneeY+' Z" fill="#2d2d2d"/>';
+    shoes = '<ellipse cx="'+(cx-wpW*0.6)+'" cy="'+ankleY+'" rx="'+(wpW*0.55)+'" ry="'+(h*0.022)+'" fill="#111"/>'
+      +'<ellipse cx="'+(cx+wpW*0.6)+'" cy="'+ankleY+'" rx="'+(wpW*0.55)+'" ry="'+(h*0.022)+'" fill="#111"/>';
+  } else if (type===2) {
+    var tW2 = Math.round(w*0.56), stW = Math.round(w*0.12);
+    body = '<rect x="'+(cx-tW2/2)+'" y="'+(sY+h*0.02)+'" width="'+tW2+'" height="'+(chB-sY-h*0.02)+'" rx="4" fill="#1a1a1a"/>'
+      +'<rect x="'+(cx-tW2*0.42)+'" y="'+sY+'" width="'+stW+'" height="'+(h*0.07)+'" rx="3" fill="#1a1a1a"/>'
+      +'<rect x="'+(cx+tW2*0.42-stW)+'" y="'+sY+'" width="'+stW+'" height="'+(h*0.07)+'" rx="3" fill="#1a1a1a"/>';
+    arms = '<rect x="'+(cx-tW2/2-armW*0.9)+'" y="'+(sY+h*0.04)+'" width="'+(armW*0.9)+'" height="'+(h*0.25)+'" rx="'+(armW/2)+'" fill="'+sk+'"/>'
+      +'<rect x="'+(cx+tW2/2)+'" y="'+(sY+h*0.04)+'" width="'+(armW*0.9)+'" height="'+(h*0.25)+'" rx="'+(armW/2)+'" fill="'+sk+'"/>';
+    var spW = Math.round(w*0.38);
+    legs = '<path d="M'+(cx-spW)+' '+chB+' L'+(cx-spW*1.15)+' '+ankleY+' L'+(cx-spW*0.08)+' '+ankleY+' L'+cx+' '+kneeY+' Z" fill="#1a1a1a"/>'
+      +'<path d="M'+(cx+spW)+' '+chB+' L'+(cx+spW*1.15)+' '+ankleY+' L'+(cx+spW*0.08)+' '+ankleY+' L'+cx+' '+kneeY+' Z" fill="#1a1a1a"/>';
+    shoes = '<path d="M'+(cx-spW*1.2)+' '+ankleY+' L'+(cx-spW*0.6)+' '+ankleY+' L'+(cx-spW*0.5)+' '+footY+' L'+(cx-spW*1.15)+' '+(ankleY+4)+' Z" fill="#0d0d0d"/>'
+      +'<path d="M'+(cx+spW*0.6)+' '+ankleY+' L'+(cx+spW*1.2)+' '+ankleY+' L'+(cx+spW*1.15)+' '+(ankleY+4)+' L'+(cx+spW*0.5)+' '+footY+' Z" fill="#0d0d0d"/>';
+  } else {
+    var ttW = Math.round(w*0.72);
+    body = '<rect x="'+(cx-ttW/2)+'" y="'+sY+'" width="'+ttW+'" height="'+(chB-sY)+'" rx="3" fill="#f0ede8"/>'
+      +'<path d="M'+(cx-ttW*0.14)+' '+sY+' Q'+cx+' '+(sY+h*0.03)+' '+(cx+ttW*0.14)+' '+sY+'" stroke="#ddd" stroke-width="1" fill="none"/>'
+      +'<rect x="'+(cx-ttW/2)+'" y="'+chB+'" width="'+ttW+'" height="'+(h*0.022)+'" rx="2" fill="#2a2010"/>'
+      +'<rect x="'+(cx-ttW*0.08)+'" y="'+(chB+h*0.002)+'" width="'+(ttW*0.16)+'" height="'+(h*0.018)+'" rx="1" fill="#8a6a30"/>';
+    arms = '<rect x="'+(cx-ttW/2-armW)+'" y="'+sY+'" width="'+armW+'" height="'+(h*0.22)+'" rx="'+(armW/2)+'" fill="#f0ede8"/>'
+      +'<rect x="'+(cx+ttW/2)+'" y="'+sY+'" width="'+armW+'" height="'+(h*0.22)+'" rx="'+(armW/2)+'" fill="#f0ede8"/>';
+    var djW = Math.round(w*0.36);
+    legs = '<path d="M'+(cx-djW)+' '+(chB+h*0.02)+' L'+(cx-djW*1.05)+' '+ankleY+' L'+(cx-djW*0.08)+' '+ankleY+' L'+cx+' '+kneeY+' Z" fill="#4a6080"/>'
+      +'<path d="M'+(cx+djW)+' '+(chB+h*0.02)+' L'+(cx+djW*1.05)+' '+ankleY+' L'+(cx+djW*0.08)+' '+ankleY+' L'+cx+' '+kneeY+' Z" fill="#4a6080"/>';
+    shoes = '<rect x="'+(cx-djW*1.12)+'" y="'+(ankleY-4)+'" width="'+(djW*1.1)+'" height="'+(h*0.04)+'" rx="5" fill="#e8e4df"/>'
+      +'<rect x="'+(cx+djW*0.02)+'" y="'+(ankleY-4)+'" width="'+(djW*1.1)+'" height="'+(h*0.04)+'" rx="5" fill="#e8e4df"/>'
+      +'<rect x="'+(cx-djW*1.18)+'" y="'+(ankleY+h*0.034)+'" width="'+(djW*1.18)+'" height="'+(h*0.016)+'" rx="3" fill="#ddd"/>'
+      +'<rect x="'+(cx)+'" y="'+(ankleY+h*0.034)+'" width="'+(djW*1.18)+'" height="'+(h*0.016)+'" rx="3" fill="#ddd"/>';
+  }
+  return '<svg width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    +shadow+hairBase+neck+body+arms+legs+shoes+head+earL+earR+eyeL+eyeR+hilL+hilR+brow+mouth+hairFront+'</svg>';
+}
+
+
+var CHAR_DEFS = [
+  {id:'ca', type:0, h:360, behavior:'walk',  speed:42, startPct:4,  dir:1,  talkType:'talk'},
+  {id:'cb', type:1, h:320, behavior:'laugh', speed:58, startPct:28, dir:1,  talkType:'laugh'},
+  {id:'cc', type:2, h:340, behavior:'talk',  speed:50, startPct:60, dir:-1, talkType:'talk'},
+  {id:'cd', type:3, h:350, behavior:'walk',  speed:34, startPct:80, dir:-1, talkType:'talk'}
+];
+var ANIM_CLASS = {walk:'anim-walk', laugh:'anim-laugh', talk:'anim-talk'};
+var SPEECH_IV = {walk:0, laugh:3000, talk:2800};
+var walkers = {};
+
+function initChars() {
+  var cont = document.getElementById('chars');
+  if (!cont) return;
+  var vw = window.innerWidth;
+  CHAR_DEFS.forEach(function(def) {
+    var wrap = document.createElement('div');
+    wrap.className = 'char-walker'; wrap.id = def.id;
+    var bub = document.createElement('div');
+    bub.className = 'bubble'; bub.id = def.id + '-bub';
+    wrap.appendChild(bub);
+    var fig = document.createElement('div');
+    fig.id = def.id + '-fig';
+    fig.className = ANIM_CLASS[def.behavior] || 'anim-walk';
+    fig.innerHTML = makeSVG(def.type, def.h);
+    wrap.appendChild(fig);
+    cont.appendChild(wrap);
+    var sx = (def.startPct / 100) * vw;
+    wrap.style.left = sx + 'px';
+    walkers[def.id] = {x: sx, speed: vw / def.speed, dir: def.dir, w: Math.round(def.h * 0.38)};
+    startSpeech(def);
+  });
+}
+
+function startSpeech(def) {
+  var iv = SPEECH_IV[def.behavior]; if (!iv) return;
+  var lines = SPEECHES[def.talkType] || SPEECHES.talk;
+  var i = Math.floor(Math.random() * lines.length);
+  function show() {
+    var el = document.getElementById(def.id + '-bub'); if (!el) return;
+    i = (i + Math.floor(Math.random() * 3) + 1) % lines.length;
+    el.textContent = lines[i]; el.classList.add('show');
+    setTimeout(function() { el.classList.remove('show'); setTimeout(show, iv + Math.random() * 1200); }, 1600 + Math.random() * 400);
+  }
+  setTimeout(show, Math.random() * 3000 + 500);
+}
+
+function runLoop() {
+  var last = null;
+  function frame(ts) {
+    if (!last) { last = ts; requestAnimationFrame(frame); return; }
+    var dt = (ts - last) / 1000; last = ts;
+    var vw = window.innerWidth;
+    CHAR_DEFS.forEach(function(def) {
+      var ws = walkers[def.id]; var el = document.getElementById(def.id);
+      if (!el || !ws) return;
+      ws.x += ws.speed * ws.dir * dt;
+      if (ws.x > vw + 120) ws.x = -ws.w - 120;
+      if (ws.x < -ws.w - 120) ws.x = vw + 120;
+      el.style.left = ws.x + 'px';
+      var fig = document.getElementById(def.id + '-fig');
+      if (fig) { var svg = fig.querySelector('svg'); if (svg) svg.style.transform = ws.dir < 0 ? 'scaleX(-1)' : ''; }
+    });
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+
+// ── INIT ──
+window.addEventListener('DOMContentLoaded', function() {
+  initChars();
+  runLoop();
+  cardPrice('basic'); cardPrice('standard'); cardPrice('premium');
+  updateImgCut(10);
+});
+</script>
+</body>
+</html>
